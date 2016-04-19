@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import framgia.vn.photo_sketch.R;
+import framgia.vn.photo_sketch.asynctask.ApplyEffectAsync;
 import framgia.vn.photo_sketch.asynctask.DisplayBitmapAsync;
 import framgia.vn.photo_sketch.constants.ConstEffects;
 import framgia.vn.photo_sketch.library.UriLibrary;
@@ -329,6 +330,9 @@ public class PhotoActivity extends AppCompatActivity implements ConstEffects {
             switch (seekBar.getId()) {
                 case R.id.seekBar_hue:
                     mTextViewValueHue.setText(String.valueOf(mSeekBarHue.getProgress()));
+                    mEffectSelect.setValue(mSeekBarHue.getProgress());
+                    ApplyEffectAsync applyEffectAsync = new ApplyEffectAsync(PhotoActivity.this, getBitmap());
+                    applyEffectAsync.execute(mEffectSelect);
                     break;
                 case R.id.seekBar_bright:
                     mTextViewValueBright.setText(String.valueOf(mSeekBarBright.getProgress()));
