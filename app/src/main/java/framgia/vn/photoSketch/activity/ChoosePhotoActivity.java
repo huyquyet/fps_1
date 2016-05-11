@@ -1,4 +1,4 @@
-package framgia.vn.photo_sketch.activity;
+package framgia.vn.photoSketch.activity;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -7,19 +7,21 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import framgia.vn.photo_sketch.R;
-import framgia.vn.photo_sketch.constants.ConstActivity;
-import framgia.vn.photo_sketch.library.UriLibrary;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 
-public class MainActivity extends AppCompatActivity implements ConstActivity, View.OnClickListener {
+import framgia.vn.photoSketch.R;
+import framgia.vn.photoSketch.constants.ConstActivity;
+import framgia.vn.photoSketch.library.UriLibrary;
+
+
+public class ChoosePhotoActivity extends AppCompatActivity implements ConstActivity, View.OnClickListener {
     private Animation mAnimation;
     private RelativeLayout mRelativeCamera;
     private RelativeLayout mRelativeGallery;
@@ -32,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements ConstActivity, Vi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
         setSupportActionBar(toolbar);
         getControl();
         setEvents();
@@ -52,28 +56,7 @@ public class MainActivity extends AppCompatActivity implements ConstActivity, Vi
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        finish();
     }
 
     @Override

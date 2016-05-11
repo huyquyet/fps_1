@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/list_effect"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentStart="true"
+    android:background="@color/background_list_filter"
+    android:clickable="true"
+    android:orientation="vertical">
+
+    <HorizontalScrollView
+        android:id="@+id/horizontal_scroll_view_effects"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        tools:ignore="UselessParent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RelativeLayout
+                style="@style/list_effect_relativeLayout"
+                android:tag="@string/hue">
+
+                <ImageView
+                    android:id="@+id/image_effect_hue"
+                    style="@style/list_effect_imageView" />
+
+                <TextView
+                    style="@style/list_effect_textView"
+                    android:layout_below="@+id/image_effect_hue"
+                    android:text="@string/hue" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                style="@style/list_effect_relativeLayout"
+                android:tag="@string/bright">
+
+                <ImageView
+                    android:id="@+id/image_effect_bright"
+                    style="@style/list_effect_imageView" />
+
+                <TextView
+                    style="@style/list_effect_textView"
+                    android:layout_below="@+id/image_effect_bright"
+                    android:text="@string/bright" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                style="@style/list_effect_relativeLayout"
+                android:tag="@string/contrast">
+
+                <ImageView
+                    android:id="@+id/image_effect_contrast"
+                    style="@style/list_effect_imageView" />
+
+                <TextView
+                    style="@style/list_effect_textView"
+                    android:layout_below="@+id/image_effect_contrast"
+                    android:text="@string/contrast" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                style="@style/list_effect_relativeLayout"
+                android:tag="@string/highlight">
+
+                <ImageView
+                    android:id="@+id/image_effect_highlight"
+                    style="@style/list_effect_imageView" />
+
+                <TextView
+                    style="@style/list_effect_textView"
+                    android:layout_below="@+id/image_effect_highlight"
+                    android:text="@string/highlight" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                style="@style/list_effect_relativeLayout"
+                android:tag="@string/grey_scale">
+
+                <ImageView
+                    android:id="@+id/image_effect_grey_scale"
+                    style="@style/list_effect_imageView" />
+
+                <TextView
+                    style="@style/list_effect_textView"
+                    android:layout_below="@+id/image_effect_grey_scale"
+                    android:text="@string/grey_scale" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                style="@style/list_effect_relativeLayout"
+                android:tag="@string/sepia">
+
+                <ImageView
+                    android:id="@+id/image_effect_sepia"
+                    style="@style/list_effect_imageView" />
+
+                <TextView
+                    style="@style/list_effect_textView"
+                    android:layout_below="@+id/image_effect_sepia"
+                    android:text="@string/sepia" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                style="@style/list_effect_relativeLayout"
+                android:tag="@string/invert">
+
+                <ImageView
+                    android:id="@+id/image_effect_invert"
+                    style="@style/list_effect_imageView" />
+
+                <TextView
+                    style="@style/list_effect_textView"
+                    android:layout_below="@+id/image_effect_invert"
+                    android:text="@string/invert" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                style="@style/list_effect_relativeLayout"
+                android:tag="@string/vignette">
+
+                <ImageView
+                    android:id="@+id/image_effect_vignette"
+                    style="@style/list_effect_imageView" />
+
+                <TextView
+                    style="@style/list_effect_textView"
+                    android:layout_below="@+id/image_effect_vignette"
+                    android:text="@string/vignette" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                style="@style/list_effect_relativeLayout"
+                android:tag="@string/sketch">
+
+                <ImageView
+                    android:id="@+id/image_effect_sketch"
+                    style="@style/list_effect_imageView" />
+
+                <TextView
+                    style="@style/list_effect_textView"
+                    android:layout_below="@+id/image_effect_sketch"
+                    android:text="@string/sketch" />
+            </RelativeLayout>
+        </LinearLayout>
+    </HorizontalScrollView>
+</LinearLayout>
