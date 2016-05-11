@@ -3,17 +3,17 @@
     android:fillAfter="true"
     android:fillEnabled="true">
     <alpha
-        android:duration="300"
+        android:duration="@integer/time_duration_alpha"
         android:fromAlpha="0"
-        android:startOffset="200"
+        android:startOffset="@integer/time_startOffset_alpha"
         android:toAlpha="1" />
     <scale
-        android:duration="300"
+        android:duration="@integer/time_duration_scale"
         android:fromXScale="3"
         android:fromYScale="3"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:startOffset="200"
+        android:startOffset="@integer/time_startOffset_scale"
         android:toXScale="1"
         android:toYScale="1" />
 </set>

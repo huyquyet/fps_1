@@ -1,6 +1,5 @@
-package framgia.vn.photo_sketch.Activity;
+package framgia.vn.photoSketch.activity;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,18 +7,21 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import framgia.vn.photo_sketch.Constants.ConstActivity;
-import framgia.vn.photo_sketch.R;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 
-public class MainActivity extends AppCompatActivity implements ConstActivity {
+import framgia.vn.photoSketch.R;
+import framgia.vn.photoSketch.constants.ConstActivity;
+import framgia.vn.photoSketch.library.UriLibrary;
+
+
+public class ChoosePhotoActivity extends AppCompatActivity implements ConstActivity, View.OnClickListener {
     private Animation mAnimation;
     private RelativeLayout mRelativeCamera;
     private RelativeLayout mRelativeGallery;
@@ -32,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements ConstActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
         setSupportActionBar(toolbar);
         getControl();
         setEvents();
@@ -52,28 +56,21 @@ public class MainActivity extends AppCompatActivity implements ConstActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        finish();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.relative_camera:
+                flyOut();
+                displayCamera();
+                break;
+            case R.id.relative_gallery:
+                flyOut();
+                displayGallery();
+                break;
         }
-        return super.onOptionsItemSelected(item);
     }
 
     private void flyIn() {
@@ -104,20 +101,8 @@ public class MainActivity extends AppCompatActivity implements ConstActivity {
     }
 
     private void setEvents() {
-        mRelativeCamera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                flyOut();
-                displayCamera();
-            }
-        });
-        mRelativeGallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                flyOut();
-                displayGallery();
-            }
-        });
+        mRelativeCamera.setOnClickListener(this);
+        mRelativeGallery.setOnClickListener(this);
     }
 
     @Override
@@ -143,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements ConstActivity {
     }
 
     private void displayCamera() {
-        mUri = getOutputMediaFile();
+        mUri = UriLibrary.getOutputMediaFile(getContentResolver());
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mUri);
         startActivityForResult(intent, REQUEST_CAMERA);
@@ -153,16 +138,9 @@ public class MainActivity extends AppCompatActivity implements ConstActivity {
         if (Environment.getExternalStorageState().equalsIgnoreCase(Environment.MEDIA_MOUNTED)
                 && !Environment.getExternalStorageState().equalsIgnoreCase(Environment.MEDIA_CHECKING)) {
             Intent intent = new Intent();
-            intent.setType("image/jpeg");
+            intent.setType(TYPE_INPUT);
             intent.setAction(Intent.ACTION_GET_CONTENT);
             startActivityForResult(intent, REQUEST_GALLERY);
         }
-    }
-
-    private Uri getOutputMediaFile() {
-        ContentValues values = new ContentValues();
-//        values.put(MediaStore.Images.Media.TITLE, "Camera Pro");
-//        values.put(MediaStore.Images.Media.DESCRIPTION, "www.appsroid.org");
-        return getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
     }
 }
