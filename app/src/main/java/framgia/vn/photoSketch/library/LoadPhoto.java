@@ -18,10 +18,20 @@ import framgia.vn.photoSketch.models.Photo;
 public class LoadPhoto {
     private static List<Photo> mListPhoto;
 
-    public static List<Photo> loadPhotoAll() {
-        mListPhoto = new ArrayList<>();
-        // TODO : load all image in device
-        return mListPhoto;
+    public static List<Photo> loadPhotoAll(ContentResolver contentResolver) {
+        List<Photo> photos = new ArrayList<>();
+        final String[] columns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
+        final String orderBy = MediaStore.Images.Media._ID;
+        Cursor imagecursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
+        int image_column_index = imagecursor.getColumnIndex(MediaStore.Images.Media._ID);
+        for (int i = 0; i < imagecursor.getCount(); i++) {
+            imagecursor.moveToPosition(i);
+            int dataColumnIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            Photo photo = new Photo();
+            photo.setUri(imagecursor.getString(dataColumnIndex));
+            photos.add(photo);
+        }
+        return photos;
     }
 
     public static List<Photo> loadPhotoPaths(String name) {
@@ -37,22 +47,5 @@ public class LoadPhoto {
             }
         }
         return mListPhoto;
-    }
-
-    public static List<Photo> loadPhotos(ContentResolver contentResolver) {
-        List<Photo> photos = new ArrayList<>();
-        final String[] columns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
-        final String orderBy = MediaStore.Images.Media._ID;
-        Cursor imagecursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
-        int image_column_index = imagecursor.getColumnIndex(MediaStore.Images.Media._ID);
-        for (int i = 0; i < imagecursor.getCount(); i++) {
-            imagecursor.moveToPosition(i);
-            int id = imagecursor.getInt(image_column_index);
-            int dataColumnIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.DATA);
-            Photo photo = new Photo();
-            photo.setUri(imagecursor.getString(dataColumnIndex));
-            photos.add(photo);
-        }
-        return photos;
     }
 }
