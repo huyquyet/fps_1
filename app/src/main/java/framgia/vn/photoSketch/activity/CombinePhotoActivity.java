@@ -66,7 +66,7 @@ public class CombinePhotoActivity extends AppCompatActivity implements ConstActi
     }
 
     private void setData() {
-        mListPhoto = LoadPhoto.loadPhotoPaths(BitmapUtil.FOLDER_NAME);
+        mListPhoto = LoadPhoto.loadPhotoAll(getContentResolver());
         mListPhotoChoose = new ArrayList<Photo>();
         mAdapterImageCombine = new AdapterImageCombine(mListPhotoChoose);
         mRecyclerViewImageCombine.setAdapter(mAdapterImageCombine);

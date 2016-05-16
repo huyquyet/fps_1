@@ -25,7 +25,7 @@ public class ListPhotoAdapter extends RecyclerView.Adapter<ListPhotoAdapter.View
     public static final String IMAGE_MIME_TYPE = "image/*";
     private List<Photo> mListPhoto;
     private Context mContext;
-    public static final int IMAGE_SIZE = 196;
+    public static final int IMAGE_SIZE = 496;
 
     public ListPhotoAdapter(List<Photo> listPhoto) {
         mListPhoto = listPhoto;
