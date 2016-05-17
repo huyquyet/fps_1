@@ -6,8 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -27,8 +27,9 @@ import com.facebook.CallbackManager;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
-import com.soundcloud.android.crop.Crop;
+import com.theartofdev.edmodo.cropper.CropImage;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,13 +37,15 @@ import framgia.vn.photoSketch.R;
 import framgia.vn.photoSketch.asynctask.ApplyEffectAsync;
 import framgia.vn.photoSketch.asynctask.DisplayBitmapAsync;
 import framgia.vn.photoSketch.asynctask.SaveImageAsync;
-import framgia.vn.photoSketch.bitmaputil.BitmapUtil;
+import framgia.vn.photoSketch.constants.AppConstant;
+import framgia.vn.photoSketch.constants.ConstActivity;
 import framgia.vn.photoSketch.constants.ConstEffects;
 import framgia.vn.photoSketch.library.CropLibrary;
 import framgia.vn.photoSketch.library.DialogUtils;
 import framgia.vn.photoSketch.library.UriLibrary;
 import framgia.vn.photoSketch.library.ZoomLibrary;
 import framgia.vn.photoSketch.models.Effect;
+import framgia.vn.photoSketch.models.Photo;
 
 public class PhotoActivity extends AppCompatActivity implements ConstEffects {
     private ApplyEffectAsync mApplyEffectAsync;
@@ -87,8 +90,9 @@ public class PhotoActivity extends AppCompatActivity implements ConstEffects {
     private int mValueEffect;
     private List<Effect> mEffects;
     private List<Bitmap> mBitmaps;
+    private Photo mPhoto;
     // crop and rotate fab
-    private FloatingActionButton mFabCrop = null, mFabRotate = null;
+    private FloatingActionButton mFabCrop = null;
     private CropLibrary mCropLib = null;
 
     @Override
@@ -188,11 +192,14 @@ public class PhotoActivity extends AppCompatActivity implements ConstEffects {
         mHorizontalScrollViewEffects = (HorizontalScrollView) findViewById(R.id.horizontal_scroll_view_effects);
         Intent intent = getIntent();
         mImageUri = intent.getData();
+        if(mImageUri == null) {
+            Bundle bundle = intent.getExtras();
+            mPhoto = (Photo) bundle.getSerializable(AppConstant.PHOTO);
+        }
         mEffects = new ArrayList<Effect>();
         mBitmaps = new ArrayList<Bitmap>();
         // Crop and rotate fab:
         mFabCrop = (FloatingActionButton) findViewById(R.id.fab_crop);
-        mFabRotate = (FloatingActionButton) findViewById(R.id.fab_rotate);
     }
 
     private void setEvents() {
@@ -202,12 +209,15 @@ public class PhotoActivity extends AppCompatActivity implements ConstEffects {
         mImageViewSave.setOnClickListener(new ImageEvents());
         mImageViewUndo.setOnClickListener(new ImageEvents());
         mFabCrop.setOnClickListener(new ImageEvents());
-        mFabRotate.setOnClickListener(new ImageEvents());
     }
 
     private void loadImage() {
-        String urlImage = UriLibrary.UriToUrl(getApplicationContext(), mImageUri);
         DisplayBitmapAsync bitmap = new DisplayBitmapAsync(this);
+        if(mImageUri == null) {
+            bitmap.execute(mPhoto.getUri());
+            return;
+        }
+        String urlImage = UriLibrary.UriToUrl(getApplicationContext(), mImageUri);
         bitmap.execute(urlImage);
     }
 
@@ -230,7 +240,6 @@ public class PhotoActivity extends AppCompatActivity implements ConstEffects {
         mLayoutListEffect.startAnimation(mAnimation);
         saveUndoIn();
         mFabCrop.setVisibility(View.VISIBLE);
-        mFabRotate.setVisibility(View.VISIBLE);
     }
 
     private void hideListEffects() {
@@ -341,7 +350,6 @@ public class PhotoActivity extends AppCompatActivity implements ConstEffects {
         mLinearLayoutFilterSepia.setVisibility(View.GONE);
         mLinearLayoutFilterGreyScale.setVisibility(View.GONE);
         mFabCrop.setVisibility(View.GONE);
-        mFabRotate.setVisibility(View.GONE);
     }
 
     /**
@@ -402,9 +410,6 @@ public class PhotoActivity extends AppCompatActivity implements ConstEffects {
 
     private void clearData() {
         mImageView.setImageURI(null);
-        Intent intent = new Intent(PhotoActivity.this, ChoosePhotoActivity.class);
-        startActivity(intent);
-        overridePendingTransition(0, 0);
         mEffectSelect = null;
         if (mBitmap != null && !mBitmap.isRecycled()) mBitmap.recycle();
         if (mBitmaps.size() > 0) mBitmaps.clear();
@@ -414,7 +419,7 @@ public class PhotoActivity extends AppCompatActivity implements ConstEffects {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Crop.REQUEST_CROP) {
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             mCropLib.handleCrop(this, mImageView, resultCode, data);
         }
     }
@@ -493,18 +498,12 @@ public class PhotoActivity extends AppCompatActivity implements ConstEffects {
                     break;
                 case R.id.imageView_save:
                     mBitmap = getBitmap();
-                    SaveImageAsync saveImageAsync = new SaveImageAsync(PhotoActivity.this);
+                    SaveImageAsync saveImageAsync = new SaveImageAsync(PhotoActivity.this, mPhoto);
                     saveImageAsync.execute(mBitmap);
                     break;
                 case R.id.fab_crop:
                     mBitmap = getBitmap();
                     mCropLib.beginCrop(PhotoActivity.this, mCropLib.bmpToUri(PhotoActivity.this, mBitmap));
-                    break;
-                case R.id.fab_rotate:
-                    mBitmap = getBitmap();
-                    String urlImage = UriLibrary.UriToUrl(getApplicationContext(), mImageUri);
-                    mBitmap = BitmapUtil.rotate(mBitmap, BitmapUtil.ORIENTATION_ROTATE_90);
-                    mImageView.setImageBitmap(mBitmap);
                     break;
             }
         }

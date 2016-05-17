@@ -38,7 +38,9 @@ public class BitmapUtil {
     public static final float SEPIA_RED = 1f;
     public static final float SEPIA_BLUE = 0.4f;
     public static final float SEPIA_GREEN = 0.6f;
-    public static final float HUE_VALUE = 360.0f;
+    public static final float HUE_VALUE = 180f;
+    public static final float HUE_BRIGHTNESS = 100f;
+    public static final float HUE_CONTRAST = 127f;
     public static final String FOLDER_NAME = "Photo";
     public static final String FILE_NAME = "image_";
     public static final String IMAGE_TYPE = ".png";
@@ -145,68 +147,65 @@ public class BitmapUtil {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
+    /**
+     * @param bitmap Image bitmap
+     * @param scale  -100 -> 100
+     * @return Image bitmap
+     */
     public static Bitmap brightness(Bitmap bitmap, int scale) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        Bitmap bmOut = Bitmap.createBitmap(width, height, bitmap.getConfig());
-        int alpha, red, green, blue;
-        int pixel;
-        for (int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
-                pixel = bitmap.getPixel(x, y);
-                alpha = Color.alpha(pixel);
-                red = Color.red(pixel);
-                green = Color.green(pixel);
-                blue = Color.blue(pixel);
-                red += scale;
-                if (red > 255) {
-                    red = 255;
-                } else if (red < 0) {
-                    red = 0;
-                }
-                green += scale;
-                if (green > 255) {
-                    green = 255;
-                } else if (green < 0) {
-                    green = 0;
-                }
-                blue += scale;
-                if (blue > 255) {
-                    blue = 255;
-                } else if (blue < 0) {
-                    blue = 0;
-                }
-                bmOut.setPixel(x, y, Color.argb(alpha, red, green, blue));
-            }
-        }
-        return bmOut;
+        Bitmap bmpBrightness = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmpBrightness);
+        Paint paint = new Paint();
+        ColorMatrix cm = new ColorMatrix();
+        float value = Math.min(HUE_BRIGHTNESS, Math.max(-HUE_BRIGHTNESS, scale));
+        float[] mat = new float[]
+                {
+                        1, 0, 0, 0, value,
+                        0, 1, 0, 0, value,
+                        0, 0, 1, 0, value,
+                        0, 0, 0, 1, 0,
+                        0, 0, 0, 0, 1
+                };
+        cm.postConcat(new ColorMatrix(mat));
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+        paint.setColorFilter(f);
+        c.drawBitmap(bitmap, 0, 0, paint);
+        return bmpBrightness;
     }
 
+    /**
+     * @param source Image bitmap
+     * @param scale  -255 -> 255
+     * @return Image bitmap
+     */
     public static Bitmap hue(Bitmap source, int scale) {
         int width = source.getWidth();
         int height = source.getHeight();
-        int[] pixels = new int[width * height];
-        int[] destColor = new int[width * height];
-        float[] HSV = new float[3];
-        source.getPixels(pixels, 0, width, 0, 0, width, height);
-        int index = 0;
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                // Convert from Color to HSV
-                Color.colorToHSV(pixels[index], HSV);
-                // Adjust HSV
-                HSV[0] = HSV[0] + (float) scale;
-                if (HSV[0] < 0.0f) {
-                    HSV[0] = 0.0f;
-                } else if (HSV[0] > HUE_VALUE) {
-                    HSV[0] = HUE_VALUE;
-                }
-                // Convert back from HSV to Color
-                destColor[index] = Color.HSVToColor(HSV);
-                index++;
-            }
-        }
-        return Bitmap.createBitmap(destColor, width, height, Bitmap.Config.ARGB_8888);
+        Bitmap bmpHue = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmpHue);
+        Paint paint = new Paint();
+        ColorMatrix cm = new ColorMatrix();
+        float value = Math.min(HUE_VALUE, Math.max(-HUE_VALUE, scale)) / HUE_VALUE * (float) Math.PI;
+        float cosVal = (float) Math.cos(value);
+        float sinVal = (float) Math.sin(value);
+        float lumR = 0.213f;
+        float lumG = 0.715f;
+        float lumB = 0.072f;
+        float[] mat = new float[]
+                {
+                        lumR + cosVal * (1 - lumR) + sinVal * (-lumR), lumG + cosVal * (-lumG) + sinVal * (-lumG), lumB + cosVal * (-lumB) + sinVal * (1 - lumB), 0, 0,    // red
+                        lumR + cosVal * (-lumR) + sinVal * (0.143f), lumG + cosVal * (1 - lumG) + sinVal * (0.140f), lumB + cosVal * (-lumB) + sinVal * (-0.283f), 0, 0,    // green
+                        lumR + cosVal * (-lumR) + sinVal * (-(1 - lumR)), lumG + cosVal * (-lumG) + sinVal * (lumG), lumB + cosVal * (1 - lumB) + sinVal * (lumB), 0, 0,    // blue
+                        0f, 0f, 0f, 1f, 0f, // alpha
+                        0f, 0f, 0f, 0f, 1f
+                };
+        cm.postConcat(new ColorMatrix(mat));
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+        paint.setColorFilter(f);
+        c.drawBitmap(source, 0, 0, paint);
+        return bmpHue;
     }
 
     /**
@@ -214,7 +213,7 @@ public class BitmapUtil {
      * @param scale  0 ->1
      * @return
      */
-    public static Bitmap sepia(Bitmap bitmap, float scale ) {
+    public static Bitmap sepia(Bitmap bitmap, float scale) {
         int width, height;
         height = bitmap.getHeight();
         width = bitmap.getWidth();
@@ -238,7 +237,7 @@ public class BitmapUtil {
         int[] colors = new int[]{0, 0x55000000, 0xff000000};
         float[] positions = new float[]{0.0f, 0.5f, 2f};
         RadialGradient gradient = new RadialGradient(width / 2, height / 2, radius, colors, positions, Shader.TileMode.CLAMP);
-        Bitmap bitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawARGB(1, 0, 0, 0);
         final Paint paint = new Paint();
@@ -298,49 +297,51 @@ public class BitmapUtil {
         return result;
     }
 
-    public static Bitmap contrast(Bitmap bitmap, double scale) {
+    public static Bitmap contrast(Bitmap bitmap, int scale) {
+        double deltaIndex[] = {
+                0, 0.01, 0.02, 0.04, 0.05, 0.06, 0.07, 0.08, 0.1, 0.11,
+                0.12, 0.14, 0.15, 0.16, 0.17, 0.18, 0.20, 0.21, 0.22, 0.24,
+                0.25, 0.27, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40, 0.42,
+                0.44, 0.46, 0.48, 0.5, 0.53, 0.56, 0.59, 0.62, 0.65, 0.68,
+                0.71, 0.74, 0.77, 0.80, 0.83, 0.86, 0.89, 0.92, 0.95, 0.98,
+                1.0, 1.06, 1.12, 1.18, 1.24, 1.30, 1.36, 1.42, 1.48, 1.54,
+                1.60, 1.66, 1.72, 1.78, 1.84, 1.90, 1.96, 2.0, 2.12, 2.25,
+                2.37, 2.50, 2.62, 2.75, 2.87, 3.0, 3.2, 3.4, 3.6, 3.8,
+                4.0, 4.3, 4.7, 4.9, 5.0, 5.5, 6.0, 6.5, 6.8, 7.0,
+                7.3, 7.5, 7.8, 8.0, 8.4, 8.7, 9.0, 9.4, 9.6, 9.8,
+                10.0
+        };
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        Bitmap bmOut = Bitmap.createBitmap(width, height, bitmap.getConfig());
-        Canvas c = new Canvas();
-        c.setBitmap(bmOut);
-
-        // draw bitmap to bmOut from src bitmap so we can modify it
-        c.drawBitmap(bitmap, 0, 0, null);
-        int alpha, red, green, blue, pixel;
-        double contrast = Math.pow((100 + scale) / 100, 2);
-        for (int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
-                pixel = bitmap.getPixel(x, y);
-                alpha = Color.alpha(pixel);
-                /* Color RED */
-                red = Color.red(pixel);
-                red = (int) (((((red / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-                if (red < 0) {
-                    red = 0;
-                } else if (red > 255) {
-                    red = 255;
-                }
-                /* Color GREEN */
-                green = Color.green(pixel);
-                green = (int) (((((green / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-                if (green < 0) {
-                    green = 0;
-                } else if (green > 255) {
-                    green = 255;
-                }
-                /* Color BLUE */
-                blue = Color.blue(pixel);
-                blue = (int) (((((blue / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-                if (blue < 0) {
-                    blue = 0;
-                } else if (blue > 255) {
-                    blue = 255;
-                }
-                bmOut.setPixel(x, y, Color.argb(alpha, red, green, blue));
+        Bitmap bmpContrast = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmpContrast);
+        Paint paint = new Paint();
+        ColorMatrix cm = new ColorMatrix();
+        float x = 0.0f;
+        if (scale < 0) {
+            x = 127 + (float) scale / 100 * HUE_CONTRAST;
+        } else {
+            x = scale % 1;
+            if (x == 0) {
+                x = (float) deltaIndex[scale];
+            } else {
+                x = (float) deltaIndex[(scale << 0)] * (1 - x) + (float) deltaIndex[(scale << 0) + 1] * x; // use linear interpolation for more granularity.
             }
+            x = x * 127 + 127;
         }
-        return bmOut;
+        float[] mat = new float[]
+                {
+                        x / HUE_CONTRAST, 0, 0, 0, 0.5f * (HUE_CONTRAST - x),
+                        0, x / HUE_CONTRAST, 0, 0, 0.5f * (HUE_CONTRAST - x),
+                        0, 0, x / HUE_CONTRAST, 0, 0.5f * (HUE_CONTRAST - x),
+                        0, 0, 0, 1, 0,
+                        0, 0, 0, 0, 1
+                };
+        cm.postConcat(new ColorMatrix(mat));
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+        paint.setColorFilter(f);
+        c.drawBitmap(bitmap, 0, 0, paint);
+        return bmpContrast;
     }
 
     public static Bitmap modifyOrientation(Bitmap bitmap, String image_url) throws IOException {
@@ -370,13 +371,14 @@ public class BitmapUtil {
         return bm;
     }
 
-    public static void saveBitmapToSdcard(Bitmap bitmap) throws IOException {
+    public static String saveBitmapToSdcard(Bitmap bitmap) throws IOException {
         String dirPath = Environment.getExternalStorageDirectory().getAbsolutePath() +
                 File.separator + ConstActivity.ROOT_FOLDER +
                 File.separator + FOLDER_NAME;
         File dir = new File(dirPath);
         if (!dir.exists())
-            dir.mkdir();
+            dir.mkdirs();
+
         String fileName = FILE_NAME + String.valueOf(System.currentTimeMillis()) + IMAGE_TYPE;
         File file = new File(dir, fileName);
         FileOutputStream fos = new FileOutputStream(file, true);
@@ -384,5 +386,6 @@ public class BitmapUtil {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
         bos.flush();
         bos.close();
+        return file.getAbsolutePath();
     }
 }
